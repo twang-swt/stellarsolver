@@ -38,10 +38,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #ifndef _WIN32 //# Modified by Robert Lancaster for the StellarSolver Internal Library
 #include <sys/resource.h>
 #include <unistd.h>
+#include <sys/mman.h>
 #else
 #include "windows.h"
 #include "io.h"
@@ -123,6 +123,10 @@
 
 /* A very simple hash */
 #define PTR_HASH(ptr) (((unsigned long int) ptr) % QFITS_MEMORY_MAXPTRS)
+
+#ifndef MAP_FAILED
+#define MAP_FAILED -1
+#endif
 
 /*-----------------------------------------------------------------------------
                         Private variables
@@ -331,7 +335,11 @@ void * qfits_memory_malloc(
         /* Create swap file with rights: rw-rw-rw- */
         swapfileid = ++ qfits_memory_table.file_reg;
         fname = qfits_memory_tmpfilename(swapfileid);
-        swapfd = open(fname, O_RDWR | O_CREAT);
+#ifndef _WIN32
+        swapfd = open(fname, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+#else
+        swapfd = _open(fname, _O_RDWR | _O_CREAT);
+#endif
         if (swapfd==-1) {
             debug("qfits_mem: cannot create swap file\n"); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
             exit(-1);
@@ -348,10 +356,18 @@ void * qfits_memory_malloc(
         /* Dump empty buffers into file */
         memset(wbuf, 0, MEMPAGESZ);
         for (i=0; i<nbufs; i++) {
+#ifndef _WIN32
             if (write(swapfd, wbuf, MEMPAGESZ)==-1) {
+#else
+            if (_write(swapfd, wbuf, MEMPAGESZ)==-1) {
+#endif
                 perror("write");
                 debug("qfits_mem: fatal error: cannot create swapfile\n"); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
+#ifndef _WIN32
                 close(swapfd);
+#else
+                _close(swapfd);
+#endif
                 remove(fname);
                 exit(-1);
             }
@@ -371,7 +387,11 @@ void * qfits_memory_malloc(
         if ((char*)ptr == (char*)-1) {
             perror("mmap");
             debug("qfits_mem: fatal error: mmap failed for swap file\n"); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
+#ifndef _WIN32
             close(swapfd);
+#else
+            _close(swapfd);
+#endif
             remove(fname);
             exit(-1);
         }
@@ -509,7 +529,11 @@ void* qfits_memory_falloc2(
 	int             srclin) {
 
     char        *   ptr;
+#ifndef _WIN32
     struct stat     sta;
+#else
+    struct _stat     sta;
+#endif
     int             fd;
 	int eno;
 	size_t maplen;
@@ -517,7 +541,11 @@ void* qfits_memory_falloc2(
 	int mapoff;
 
 	/* Check file's existence and compute its size */
-	if (stat(name, &sta)==-1) {
+#ifndef _WIN32
+    if (stat(name, &sta)==-1) {
+#else
+    if (_stat64i32(name, &sta)==-1) {
+#endif
 		qfits_warning("qfits_memory_falloc2(%s:%i): cannot stat file \"%s\"\n",
 					  srcname, srclin, name);
 		if (QFITS_MEMORY_MODE == 0) return NULL;
@@ -531,7 +559,11 @@ void* qfits_memory_falloc2(
 		else exit(1);
 	}
 	/* Open file */
-	if ((fd=open(name, O_RDONLY))==-1) {
+#ifndef _WIN32
+    if ((fd=open(name, O_RDONLY))==-1) {
+#else
+    if ((fd=_open(name, _O_RDONLY))==-1) {
+#endif
 		qfits_warning("qfits_memory_falloc2(%s:%i): failed to open file \"%s\": %s\n",
 					  srcname, srclin, name, strerror(errno));
 		if (QFITS_MEMORY_MODE == 0) return NULL;
@@ -603,7 +635,11 @@ char * qfits_memory_falloc(
 {
     unsigned        mm_hash;
     char        *   ptr;
+#ifndef _WIN32
     struct stat     sta;
+#else
+    struct _stat     sta;
+#endif
     int             fd;
     int             nptrs;
     int             i;
@@ -615,7 +651,11 @@ char * qfits_memory_falloc(
         if (size!=NULL) *size = 0;
 
         /* Check file's existence and compute its size */
+#ifndef _WIN32
         if (stat(name, &sta)==-1) {
+#else
+        if (_stat64i32(name, &sta)==-1) {
+#endif
 			qfits_warning("qfits_memory_falloc(%s:%i): cannot stat file \"%s\"\n",
 						  srcname, srclin, name);
             if (QFITS_MEMORY_MODE == 0) return NULL;
@@ -630,7 +670,11 @@ char * qfits_memory_falloc(
         }
 
         /* Open file */
+#ifndef _WIN32
         if ((fd=open(name, O_RDONLY))==-1) {
+#else
+        if ((fd=_open(name, _O_RDONLY))==-1) {
+#endif
 			qfits_warning("qfits_memory_falloc(%s:%i): failed to open file \"%s\": %s\n",
 						  srcname, srclin, name, strerror(errno));
             if (QFITS_MEMORY_MODE == 0) return NULL;
@@ -646,7 +690,11 @@ char * qfits_memory_falloc(
 		eno = errno;
         
         /* Close file */
+#ifndef _WIN32
         close(fd);
+#else
+        _close(fd);
+#endif
         if (ptr == MAP_FAILED || ptr==NULL) {
 			qfits_warning("qfits_memory_falloc(%s:%i): failed to mmap file \"%s\": %s\n",
 						  srcname, srclin, name, strerror(eno));
@@ -720,7 +768,11 @@ char * qfits_memory_falloc(
 
     /* First mapping attempt for this file */
     /* Check file's existence and compute its size */
+#ifndef _WIN32
     if (stat(name, &sta)==-1) {
+#else
+    if (_stat64i32(name, &sta)==-1) {
+#endif
         qfits_mem_debug(
             debug("qfits_mem: cannot stat file %s - %s (%d)\n",
                     name, srcname, srclin); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
@@ -737,7 +789,11 @@ char * qfits_memory_falloc(
     }
 
     /* Open file */
+#ifndef _WIN32
     if ((fd=open(name, O_RDONLY))==-1) {
+#else
+    if ((fd=_open(name, _O_RDONLY))==-1) {
+#endif
         qfits_mem_debug(
             debug("qfits_mem: cannot open file %s - %s (%d)\n",
                     name, srcname, srclin); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
@@ -753,7 +809,11 @@ char * qfits_memory_falloc(
 #endif
     
     /* Close file */
+#ifndef _WIN32
     close(fd);
+#else
+    _close(fd);
+#endif
     if (ptr == (char*)-1 || ptr==NULL) {
         qfits_mem_debug(
             perror("mmap");
@@ -868,7 +928,11 @@ void qfits_memory_fdealloc(
                 qfits_mem_debug( perror("munmap"); );
             }
             /* Close swap file */
+#ifndef _WIN32
             if (close(qfits_memory_p_swapfd[pos])==-1) {
+#else
+            if (_close(qfits_memory_p_swapfd[pos])==-1) {
+#endif
                 qfits_mem_debug( perror("close"); );
             }
             /* Remove swap file */
@@ -1018,7 +1082,11 @@ void qfits_memory_free(
                 qfits_mem_debug( perror("munmap"); );
             }
             /* Close swap file */
+#ifndef _WIN32
             if (close(qfits_memory_p_swapfd[pos])==-1) {
+#else
+            if (_close(qfits_memory_p_swapfd[pos])==-1) {
+#endif
                 qfits_mem_debug( perror("close"); );
             }
             /* Remove swap file */

@@ -7,12 +7,6 @@
 */
 #pragma once
 
-//Includes for this project
-#include "structuredefinitions.h"
-#include "wcsdata.h"
-#include "extractorsolver.h"
-#include "parameters.h"
-#include "version.h"
 
 //QT Includes
 #include <QDir>
@@ -22,6 +16,13 @@
 #include <QVector>
 #include <QRect>
 #include <QPointer>
+
+//Includes for this project
+#include "structuredefinitions.h"
+#include "wcsdata.h"
+#include "extractorsolver.h"
+#include "parameters.h"
+#include "version.h"
 
 using namespace SSolver;
 
@@ -778,4 +779,3 @@ class StellarSolver : public QObject
         void finished();
 
 };
-

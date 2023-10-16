@@ -12,13 +12,13 @@
 #else //Linux
 #include <QProcess>
 #endif
+#include <QApplication>
+#include <QSettings>
 
 #include "stellarsolver.h"
 #include "extractorsolver.h"
 #include "externalextractorsolver.h"
 #include "onlinesolver.h"
-#include <QApplication>
-#include <QSettings>
 
 using namespace SSolver;
 
@@ -407,7 +407,7 @@ void StellarSolver::parallelSolve()
     qDeleteAll(parallelSolvers);
     parallelSolvers.clear();
     m_ParallelSolversFinishedCount = 0;
-    int threads = QThread::idealThreadCount();
+    int threads = qMin(QThread::idealThreadCount(), 2);
 
     if(params.multiAlgorithm == MULTI_SCALES)
     {
@@ -958,12 +958,12 @@ void addPathToListIfExists(QStringList *list, QString path)
 QStringList StellarSolver::getDefaultIndexFolderPaths()
 {
     QStringList indexFilePaths;
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_OSX) || defined(Q_OS_DARWIN)
     //Mac Default location
     addPathToListIfExists(&indexFilePaths, QDir::homePath() + "/Library/Application Support/Astrometry");
     //Homebrew location
     addPathToListIfExists(&indexFilePaths, "/usr/local/share/astrometry");
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     //Linux Default Location
     addPathToListIfExists(&indexFilePaths, "/usr/share/astrometry/");
     //Linux Local KStars Location
@@ -987,7 +987,7 @@ bool StellarSolver::appendStarsRAandDEC(QList<FITSImage::Star> &stars)
 //But from what I read, getting the Available RAM is inconsistent and buggy on many systems.
 bool StellarSolver::getAvailableRAM(double &availableRAM, double &totalRAM)
 {
-#if defined(Q_OS_OSX)
+#if defined(Q_OS_OSX) || defined(Q_OS_DARWIN)
     int mib [] = { CTL_HW, HW_MEMSIZE };
     size_t length;
     length = sizeof(int64_t);

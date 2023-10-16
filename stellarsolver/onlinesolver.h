@@ -7,8 +7,6 @@
 */
 #pragma once
 
-#include "externalextractorsolver.h"
-
 #include <QFile>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
@@ -19,6 +17,8 @@
 #include <QVariantMap>
 #include <QTime>
 #include <QElapsedTimer>
+
+#include "externalextractorsolver.h"
 
 #define JOB_RETRY_DURATION    2000 /* 2000 ms */
 #define JOB_RETRY_ATTEMPTS    90

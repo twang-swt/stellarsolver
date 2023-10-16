@@ -5,9 +5,9 @@
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
 */
-#include "onlinesolver.h"
 #include <QTimer>
 #include <QEventLoop>
+#include "onlinesolver.h"
 
 OnlineSolver::OnlineSolver(ProcessType type, ExtractorType exType, SolverType solType, const FITSImage::Statistic &imagestats,
                            uint8_t const *imageBuffer, QObject *parent) : ExternalExtractorSolver(type, exType, solType, imagestats, imageBuffer,
@@ -31,8 +31,13 @@ void OnlineSolver::execute()
     {
         delete xcol;
         delete ycol;
+#ifndef _WIN32
         xcol = strdup("X"); //This is the column for the x-coordinates, it doesn't accept X_IMAGE like the other one
         ycol = strdup("Y"); //This is the column for the y-coordinates, it doesn't accept Y_IMAGE like the other one
+#else
+        xcol = _strdup("X"); //This is the column for the x-coordinates, it doesn't accept X_IMAGE like the other one
+        ycol = _strdup("Y"); //This is the column for the y-coordinates, it doesn't accept Y_IMAGE like the other one
+#endif
         int fail = 0;
         if(m_ExtractorType == EXTRACTOR_INTERNAL)
             fail = runSEPExtractor();

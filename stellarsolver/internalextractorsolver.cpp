@@ -14,16 +14,18 @@
 #include <sys/stat.h>
 #endif
 
+#undef Const
+#include <QMutexLocker>
+#include <QtConcurrent>
 #include <memory>
+#include <qmath.h>
 
 #include "internalextractorsolver.h"
 #include "stellarsolver.h"
 #include "sep/extract.h"
-#include "qmath.h"
-#include <QMutexLocker>
 
 //CFitsio Includes
-#include <fitsio.h>
+#include "fitsio.h"
 
 //Astrometry.net includes
 extern "C" {
@@ -42,7 +44,7 @@ InternalExtractorSolver::InternalExtractorSolver(ProcessType pType, ExtractorTyp
 {
     //This sets the base name used for the temp files.
     m_BaseName = "internalExtractorSolver_" + QString::number(solverNum++);
-    m_PartitionThreads = QThread::idealThreadCount();
+    m_PartitionThreads = qMin(QThread::idealThreadCount(), 2);
 }
 
 InternalExtractorSolver::~InternalExtractorSolver()
@@ -404,7 +406,11 @@ int InternalExtractorSolver::runSEPExtractor()
                                           m_ActiveParameters.initialKeep / m_PartitionThreads,
                                           &backgrounds[backgrounds.size() - 1]
                                          };
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 futures.append(QtConcurrent::run(this, &InternalExtractorSolver::extractPartition, parameters));
+#else
+                futures.append(QtConcurrent::run(&InternalExtractorSolver::extractPartition, this, parameters));
+#endif
             }
         }
     }
@@ -430,26 +436,27 @@ int InternalExtractorSolver::runSEPExtractor()
         backgrounds.append(tempBackground);
 
         ImageParams parameters = {data, subWidth, subHeight, 0, 0, subWidth, subHeight, static_cast<uint32_t>(m_ActiveParameters.initialKeep), &backgrounds[backgrounds.size() - 1]};
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         futures.append(QtConcurrent::run(this, &InternalExtractorSolver::extractPartition, parameters));
+#else
+        futures.append(QtConcurrent::run(&InternalExtractorSolver::extractPartition, this, parameters));
+#endif
     }
 
-    for (auto &oneFuture : futures)
-    {
+    for (auto &oneFuture : futures) {
         oneFuture.waitForFinished();
         QList<FITSImage::Star> partitionStars = oneFuture.result();
         QList<FITSImage::Star> acceptedStars;
-        if (!startupOffsets.empty())
-        {
+        if (!startupOffsets.empty()) {
             const StartupOffset oneOffset = startupOffsets.takeFirst();
             const int startX = oneOffset.startX;
             const int startY = oneOffset.startY;
-            for (auto &oneStar : partitionStars)
-            {
+            for (auto &oneStar : partitionStars) {
                 // Don't use stars from the margins (they're detected in other partitions).
-                if (oneStar.x < (oneOffset.innerStartX - startX) ||
-                        oneStar.y < (oneOffset.innerStartY - startY) ||
-                        oneStar.x > (oneOffset.innerEndX   - startX) ||
-                        oneStar.y > (oneOffset.innerEndY   - startY))
+                if (oneStar.x < (oneOffset.innerStartX - startX)
+                    || oneStar.y < (oneOffset.innerStartY - startY)
+                    || oneStar.x > (oneOffset.innerEndX - startX)
+                    || oneStar.y > (oneOffset.innerEndY - startY))
                     continue;
                 oneStar.x += startX;
                 oneStar.y += startY;
@@ -457,6 +464,7 @@ int InternalExtractorSolver::runSEPExtractor()
             }
         }
         m_ExtractedStars.append(acceptedStars);
+        oneFuture.cancel();
     }
 
     double sumGlobal = 0, sumRmsSq = 0;

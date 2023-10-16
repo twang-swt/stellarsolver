@@ -176,7 +176,11 @@ qfits_header * qfits_header_read_hdr_string(
 /*----------------------------------------------------------------------------*/
 void qfits_zeropad(const char * filename)
 {
+#ifndef _WIN32
     struct stat sta;
+#else
+    struct _stat sta;
+#endif
     int         size;
     int         remaining;
     FILE    *   out;
@@ -185,7 +189,11 @@ void qfits_zeropad(const char * filename)
     if (filename==NULL) return;
 
     /* Get file size in bytes */
+#ifndef _WIN32
     if (stat(filename, &sta)!=0) {
+#else
+    if (_stat64i32(filename, &sta)!=0) {
+#endif
         return;
     }
     size = (int)sta.st_size;

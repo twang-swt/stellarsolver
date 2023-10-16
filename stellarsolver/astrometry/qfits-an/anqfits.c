@@ -14,11 +14,11 @@
 
 #ifndef _WIN32 //# Modified by Jasem Mutlaq for the StellarSolver Internal Library
 #include <unistd.h>
+#include <sys/mman.h>
 #endif
 
 #include <assert.h>
 #include <errno.h>
-#include <sys/mman.h>
 
 #include "anqfits.h"
 #include "qfits_std.h"
@@ -777,7 +777,11 @@ anqfits_t* anqfits_open_hdu(const char* filename, int hdu) {
     anqfits_t* qf = NULL;
     // copied from qfits_cache.c: qfits_cache_add()
     FILE* fin = NULL;
+#ifndef _WIN32
     struct stat sta;
+#else
+    struct _stat sta;
+#endif
     size_t n_blocks;
     int found_it;
     int xtend;
@@ -795,7 +799,11 @@ anqfits_t* anqfits_open_hdu(const char* filename, int hdu) {
     qfits_header* hdr = NULL;
 
     /* Stat file to get its size */
+#ifndef _WIN32
     if (stat(filename, &sta)!=0) {
+#else
+    if (_stat64i32(filename, &sta)!=0) {
+#endif
         qdebug(printf("anqfits: cannot stat file %s: %s\n",
                       filename, strerror(errno)););
         goto bailout;
@@ -860,7 +868,11 @@ anqfits_t* anqfits_open_hdu(const char* filename, int hdu) {
     debug("primary header: data_bytes %zu\n", data_bytes);
 
     qf = calloc(1, sizeof(anqfits_t));
+#ifndef _WIN32
     qf->filename = strdup(filename);
+#else
+    qf->filename = _strdup(filename);
+#endif
     qf->exts = calloc(ext_capacity, sizeof(anqfits_ext_t));
     assert(qf->exts);
     if (!qf->exts)

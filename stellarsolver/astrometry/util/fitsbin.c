@@ -6,7 +6,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 #include <string.h>
 #include <assert.h>
 
@@ -19,6 +21,10 @@
 //#include "an-endian.h" //# Modified by Robert Lancaster for the StellarSolver Internal Library
 #include "tic.h"
 #include "log.h"
+
+#ifndef MAP_FAILED
+#define MAP_FAILED -1
+#endif
 
 // For in-memory: storage of previously-written extensions.
 struct fitsext {

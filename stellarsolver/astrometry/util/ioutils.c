@@ -81,13 +81,21 @@ uint32_t ENDIAN_DETECTOR = 0x01020304;
 int copy_file(const char* infn, const char* outfn) {
     FILE* fin = fopen(infn, "rb");
     FILE* fout = fopen(outfn, "wb");
+#ifndef _WIN32
     struct stat st;
+#else
+    struct _stat st;
+#endif
     off_t len;
     if (!fin) {
         SYSERROR("Failed to open xyls file \"%s\" for copying", infn);
         return -1;
     }
+#ifndef _WIN32
     if (stat(infn, &st)) {
+#else
+    if (_stat64i32(infn, &st)) {
+#endif
         SYSERROR("Failed to stat file \"%s\"", infn);
         return -1;
     }
@@ -233,16 +241,26 @@ int pad_file(char* filename, size_t len, char pad) {
 
 Malloc
 char* dirname_safe(const char* path) {
+#ifndef _WIN32
     char* copy = strdup(path);
     char* res = strdup(dirname(copy));
+#else
+    char* copy = _strdup(path);
+    char* res = _strdup(dirname(copy));
+#endif
     free(copy);
     return res;
 }
 
 Malloc
 char* basename_safe(const char* path) {
+#ifndef _WIN32
     char* copy = strdup(path);
     char* res = strdup(basename(copy));
+#else
+    char* copy = _strdup(path);
+    char* res = _strdup(basename(copy));
+#endif
     free(copy);
     return res;
 }
@@ -252,7 +270,11 @@ char* find_file_in_dirs(const char** dirs, int ndirs, const char* filename, anbo
     if (!filename) return NULL;
     if (allow_absolute && filename[0] == '/') {
         if (file_readable(filename))
+#ifndef _WIN32
             return strdup(filename);
+#else
+            return _strdup(filename);
+#endif
     }
     for (i=0; i<ndirs; i++) {
         char* fn;
@@ -816,11 +838,19 @@ char* file_get_contents_offset(const char* fn, int offset, int size) {
 }
 
 void* file_get_contents(const char* fn, size_t* len, anbool addzero) {
+#ifndef _WIN32
     struct stat st;
+#else
+    struct _stat st;
+#endif
     char* buf;
     FILE* fid;
     off_t size;
+#ifndef _WIN32
     if (stat(fn, &st)) {
+#else
+    if (_stat64i32(fn, &st)) {
+#endif
         debug("file_get_contents: failed to stat file \"%s\"", fn); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
         return NULL;
     }
@@ -881,8 +911,16 @@ int munmap(void *addr, size_t len)
 #endif
 
 time_t file_get_last_modified_time(const char* fn) {
+#ifndef _WIN32
     struct stat st;
+#else
+    struct _stat st;
+#endif
+#ifndef _WIN32
     if (stat(fn, &st)) {
+#else
+    if (_stat64i32(fn, &st)) {
+#endif
         SYSERROR("Failed to stat() file \"%s\"", fn);
         return 0;
     }
@@ -943,8 +981,16 @@ anbool file_executable(const char* fn) {
 }
 
 anbool path_is_dir(const char* path) {
+#ifndef _WIN32
     struct stat st;
+#else
+    struct _stat st;
+#endif
+#ifndef _WIN32
     if (stat(path, &st)) {
+#else
+    if (_stat64i32(path, &st)) {
+#endif
         SYSERROR("Couldn't stat path %s", path);
         return FALSE;
     }
@@ -972,7 +1018,11 @@ int ends_with(const char* str, const char* suffix) {
 char* strdup_safe(const char* str) {
     char* rtn;
     if (!str) return NULL;
+#ifndef _WIN32
     rtn = strdup(str);
+#else
+    rtn = _strdup(str);
+#endif
     if (!rtn) {
         debug("Failed to strdup: %s\n", strerror(errno)); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
         assert(0);

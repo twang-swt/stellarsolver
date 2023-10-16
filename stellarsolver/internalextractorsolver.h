@@ -6,7 +6,7 @@
     version 2 of the License, or (at your option) any later version.
 */
 #pragma once
-
+#include <QFuture>
 #include "extractorsolver.h"
 #include "astrometrylogger.h"
 #include "qmutex.h"
@@ -18,8 +18,6 @@
 extern "C" {
 #include "astrometry/engine.h"
 }
-
-#include <QtConcurrent>
 
 using namespace SSolver;
 
@@ -197,7 +195,4 @@ class InternalExtractorSolver: public ExtractorSolver
          * @param d The factor to downsample by in both dimensions
          */
         template <typename T> bool downSampleImageType(int d);
-
-
 };
-
