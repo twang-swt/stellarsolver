@@ -56,7 +56,11 @@ static void get_filenames(const char* indexname,
                           anbool* singlefile) {
     char* basename;
     if (ends_with(indexname, ".quad.fits")) {
+#ifndef _WIN32
         basename = strdup(indexname);
+#else
+        basename = _strdup(indexname);
+#endif
         basename[strlen(indexname)-10] = '\0';
         logverb("Index name \"%s\" ends with .quad.fits: using basename \"%s\"\n",
                 indexname, basename);
@@ -64,9 +68,15 @@ static void get_filenames(const char* indexname,
         char* fits;
         if (file_readable(indexname)) {
             // assume single-file index.
+#ifndef _WIN32
             if (ckdtfn) *ckdtfn = strdup(indexname);
             if (skdtfn) *skdtfn = strdup(indexname);
             if (quadfn) *quadfn = strdup(indexname);
+#else
+            if (ckdtfn) *ckdtfn = _strdup(indexname);
+            if (skdtfn) *skdtfn = _strdup(indexname);
+            if (quadfn) *quadfn = _strdup(indexname);
+#endif
             *singlefile = TRUE;
             logverb("Index name \"%s\" is readable; assuming singe file.\n", indexname);
             return;
@@ -75,16 +85,26 @@ static void get_filenames(const char* indexname,
         if (file_readable(fits)) {
             // assume single-file index.
             indexname = fits;
+#ifndef _WIN32
             if (ckdtfn) *ckdtfn = strdup(indexname);
             if (skdtfn) *skdtfn = strdup(indexname);
             if (quadfn) *quadfn = strdup(indexname);
+#else
+            if (ckdtfn) *ckdtfn = _strdup(indexname);
+            if (skdtfn) *skdtfn = _strdup(indexname);
+            if (quadfn) *quadfn = _strdup(indexname);
+#endif
             *singlefile = TRUE;
             logverb("Index name \"%s\" with .fits suffix, \"%s\", is readable; assuming singe file.\n", indexname, fits);
             free(fits);
             return;
         }
         free(fits);
+#ifndef _WIN32
         basename = strdup(indexname);
+#else
+        basename = _strdup(indexname);
+#endif
 	logverb("Index name \"%s\": neither filename nor filename.fits exist, so using index name as base filename\n", basename);
     }
     if (ckdtfn) asprintf_safe(ckdtfn, "%s.ckdt.fits", basename);
@@ -259,8 +279,13 @@ int index_get_missing_cut_params(int indexid, int* hpnside, int* nsweep,
         *dedup = dd;
     if (margin)
         *margin = marg;
+#ifndef _WIN32
     if (pband)
         *pband = strdup(band);
+#else
+    if (pband)
+        *pband = _strdup(band);
+#endif
     return 0;
 }
 
@@ -346,7 +371,11 @@ index_t* index_load(const char* indexname, int flags, index_t* dest) {
     else
         memset(dest, 0, sizeof(index_t));
 
+#ifndef _WIN32
     dest->indexname = strdup(indexname);
+#else
+    dest->indexname = _strdup(indexname);
+#endif
 
     get_filenames(indexname, &(dest->quadfn), &(dest->codefn), &(dest->starfn),
                   &singlefile);
@@ -362,7 +391,11 @@ index_t* index_load(const char* indexname, int flags, index_t* dest) {
         goto bailout;
     }
     free(dest->indexname);
+#ifndef _WIN32
     dest->indexname = strdup(quadfile_get_filename(dest->quads));
+#else
+    dest->indexname = _strdup(quadfile_get_filename(dest->quads));
+#endif
     set_meta(dest);
 
     logverb("Index scale: [%g, %g] arcmin, [%g, %g] arcsec\n",

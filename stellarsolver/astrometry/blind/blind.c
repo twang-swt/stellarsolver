@@ -123,8 +123,13 @@ static anbool grab_tagalong_data(startree_t* starkd, MatchObj* mo, blind_t* bp,
             ERROR("Failed to read data for column \"%s\" in index", col);
             continue;
         }
+#ifndef _WIN32
         tag.name = strdup(col);
         tag.units = strdup(tag.units);
+#else
+        tag.name = _strdup(col);
+        tag.units = _strdup(tag.units);
+#endif
         tag.itemsize = fits_get_atom_size(tag.type) * tag.arraysize;
         tag.Ndata = N;
         bl_append(mo->tagalong, &tag);
@@ -274,7 +279,11 @@ void blind_set_xcol(blind_t* bp, const char* x) {
     free(bp->xcolname);
     if (!x)
         x = "X";
+#ifndef _WIN32
     bp->xcolname = strdup(x);
+#else
+    bp->xcolname = _strdup(x);
+#endif
 }
 
 void blind_set_ycol(blind_t* bp, const char* y) {
@@ -546,7 +555,11 @@ void blind_init(blind_t* bp) {
     bp->indexes = pl_new(16);
     bp->verify_wcs_list = bl_new(1, sizeof(sip_t));
     bp->verify_wcsfiles = sl_new(1);
+#ifndef _WIN32
     bp->fieldid_key = strdup("FIELDID");
+#else
+    bp->fieldid_key = _strdup("FIELDID");
+#endif
     blind_set_xcol(bp, NULL);
     blind_set_ycol(bp, NULL);
     bp->firstfield = -1;
@@ -1080,8 +1093,13 @@ static void solve_fields(blind_t* bp, sip_t* verify_wcs) {
             if (bp->solver.index && bp->solver.index->indexname) {
                 char* copy;
                 char* base;
+#ifndef _WIN32
                 copy = strdup(bp->solver.index->indexname);
                 base = strdup(basename(copy));
+#else
+                copy = _strdup(bp->solver.index->indexname);
+                base = _strdup(basename(copy));
+#endif
                 free(copy);
                 logerr(" (index %s", base);
                 free(base);

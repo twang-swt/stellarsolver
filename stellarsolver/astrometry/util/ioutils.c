@@ -53,6 +53,16 @@
  #define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
  #endif
 
+#ifdef _WIN32
+LPWSTR convertChartToLPWSTR(const char *value) {
+    size_t length = strlen(value) + 1;
+    size_t convertLength = MultiByteToWideChar(CP_ACP, 0, value, length, NULL, 0);
+    LPWSTR str = (LPWSTR)malloc(sizeof(WCHAR) * convertLength);
+    MultiByteToWideChar(CP_ACP, 0, value, length, str, convertLength);
+    return str;
+}
+#endif
+
 char* dirname(const char* path) {
        char drive[_MAX_DRIVE];
        char* dir = malloc(_MAX_DIR);
@@ -955,7 +965,9 @@ anbool file_exists(const char* fn) {
 #ifndef _MSC_VER //# Modified by Robert Lancaster for the StellarSolver Internal Library
     return fn && (access(fn, F_OK) == 0);
 #else
-    DWORD dwAttrib = GetFileAttributes(fn);
+    LPWSTR str = convertChartToLPWSTR(fn);
+    DWORD dwAttrib = GetFileAttributes(str);
+    free((void *)str);
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
                 !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #endif
@@ -966,7 +978,9 @@ anbool file_readable(const char* fn) {
     return fn && (access(fn, R_OK) == 0);
 #else
     //NOTE: THIS NEEDS TO BE CHANGED, IT JUST DETERMINES THAT THE FILE EXISTS!
-    DWORD dwAttrib = GetFileAttributes(fn);
+    LPWSTR str = convertChartToLPWSTR(fn);
+    DWORD dwAttrib = GetFileAttributes(str);
+    free((void *)str);
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
                 !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #endif

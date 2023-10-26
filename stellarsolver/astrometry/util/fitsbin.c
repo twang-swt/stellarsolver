@@ -85,11 +85,19 @@ static fitsbin_t* new_fitsbin(const char* fn) {
     if (!fb)
         return NULL;
     fb->chunks = bl_new(4, sizeof(fitsbin_chunk_t));
+#ifndef _WIN32
     if (!fn)
         // Can't make it NULL or qfits freaks out.
         fb->filename = strdup("");
     else
         fb->filename = strdup(fn);
+#else
+    if (!fn)
+        // Can't make it NULL or qfits freaks out.
+        fb->filename = _strdup("");
+    else
+        fb->filename = _strdup(fn);
+#endif
     return fb;
 }
 
@@ -133,7 +141,11 @@ int fitsbin_n_chunks(fitsbin_t* fb) {
 
 fitsbin_chunk_t* fitsbin_add_chunk(fitsbin_t* fb, fitsbin_chunk_t* chunk) {
     chunk = bl_append(fb->chunks, chunk);
+#ifndef _WIN32
     chunk->tablename_copy = strdup(chunk->tablename);
+#else
+    chunk->tablename_copy = _strdup(chunk->tablename);
+#endif
     chunk->tablename = chunk->tablename_copy;
     return chunk;
 }
@@ -355,7 +367,11 @@ int fitsbin_fix_chunk_header(fitsbin_t* fb, fitsbin_chunk_t* chunk) {
             fb->extensions = bl_new(4, sizeof(fitsext_t));
         ext.header = qfits_header_copy(chunk->header);
         ext.items = fb->items;
+#ifndef _WIN32
         ext.tablename = strdup(chunk->tablename);
+#else
+        ext.tablename = _strdup(chunk->tablename);
+#endif
         bl_append(fb->extensions, &ext);
         fb->items = NULL;
         return 0;

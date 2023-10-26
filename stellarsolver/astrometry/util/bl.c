@@ -1002,7 +1002,11 @@ void sl_reverse(sl* list) {
 char* sl_append(sl* list, const char* data) {
     char* copy;
     if (data) {
+#ifndef _WIN32
         copy = strdup(data);
+#else
+        copy = _strdup(data);
+#endif
         assert(copy);
     } else
         copy = NULL;
@@ -1022,7 +1026,11 @@ void sl_append_nocopy(sl* list, const char* data) {
 }
 
 char* sl_push(sl* list, const char* data) {
+#ifndef _WIN32
     char* copy = strdup(data);
+#else
+    char* copy = _strdup(data);
+#endif
     pl_push(list, copy);
     return copy;
 }
@@ -1042,7 +1050,11 @@ char* sl_get_const(const sl* list, size_t n) {
 char* sl_set(sl* list, size_t index, const char* value) {
     char* copy;
     assert(index >= 0);
+#ifndef _WIN32
     copy = strdup(value);
+#else
+    copy = _strdup(value);
+#endif
     if (index < list->N) {
         // we're replacing an existing value - free it!
         free(sl_get(list, index));
@@ -1062,7 +1074,11 @@ int sl_check_consistency(sl* list) {
 }
 
 char* sl_insert(sl* list, size_t indx, const char* data) {
+#ifndef _WIN32
     char* copy = strdup(data);
+#else
+    char* copy = _strdup(data);
+#endif
     bl_insert(list, indx, &copy);
     return copy;
 }
@@ -1155,8 +1171,13 @@ static char* sljoin(sl* list, const char* join, int forward) {
     size_t offset;
     size_t JL;
 
+#ifndef _WIN32
     if (sl_size(list) == 0)
         return strdup("");
+#else
+    if (sl_size(list) == 0)
+        return _strdup("");
+#endif
 
     // step through the list forward or backward?
     if (forward) {
@@ -1255,7 +1276,11 @@ void sl_insert_sorted_nocopy(sl* list, const char* string) {
 }
 
 char* sl_insert_sorted(sl* list, const char* string) {
+#ifndef _WIN32
     char* copy = strdup(string);
+#else
+    char* copy = _strdup(string);
+#endif
     pl_insert_sorted(list, copy, bl_compare_strings_ascending);
     return copy;
 }
