@@ -4,13 +4,16 @@
 #include <QUuid>
 #if defined(Q_OS_IOS)
 #include <cstring>
-#include "CppNSHomeDirectory.h"
 #endif
 #include "ssolverutils/fileio.h"
 extern "C" {
 #include "astrometry/starutil.h"
 }
 #include "stellar_solver.h"
+
+namespace SW {
+    extern std::string CppNSHomeDirectory();
+}
 
 const QString Stellar_Solver::IMAGE_ID = "stellar_solver_image";
 

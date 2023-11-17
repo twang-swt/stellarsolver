@@ -1,8 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QQuickItem>
-#include <QQuickImageProvider>
+#include <QImage>
 #include "stellarsolver/stellarsolver.h"
 #include "stellarsolver/classdefinitions.h"
 
