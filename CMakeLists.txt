@@ -557,6 +557,8 @@ export(TARGETS stellarsolver
 # 3. Configure the Include Directories
 target_include_directories(stellarsolver PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/libstellarsolver>)
 
 # 4. Install StellarSolver Config
