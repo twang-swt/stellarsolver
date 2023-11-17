@@ -28,15 +28,15 @@ typedef enum
     INTEGRATED_RGB
 } ColorChannel;
 
-static const QString getParityText(Parity parity){
+static inline const QString getParityText(Parity parity){
     return parity == FITSImage::NEGATIVE ? "negative" : "positive";
 }
 
-static const QString getShortParityText(Parity parity){
+static inline const QString getShortParityText(Parity parity){
     return parity == FITSImage::NEGATIVE ? "neg" : "pos";
 }
 
-static const QString getColorChannelText(ColorChannel channel){
+static inline const QString getColorChannelText(ColorChannel channel){
     switch(channel)
     {
         case RED:
