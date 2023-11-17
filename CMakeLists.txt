@@ -41,52 +41,6 @@ include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry")
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include")
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include/astrometry")
 
-set(config_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/util/os-features-test.c
-    )
-
-set(config_FN
-    "${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include/astrometry/os-features-config.h"
-    )
-
-file(REMOVE "${config_FN}")
-if (WIN32)
-
-    file(APPEND "${config_FN}" "#define NEED_DECLARE_QSORT_R 1\n")
-    file(APPEND "${config_FN}" "#define NEED_QSORT_R 1\n")
-    file(APPEND "${config_FN}" "#define NEED_SWAP_QSORT_R 0\n")
-
-else(WIN32)
-
-try_run(RUN_RESULT_2 COMPILE_SUCCESS_2 ${CMAKE_CURRENT_BINARY_DIR} ${config_SRCS} COMPILE_DEFINITIONS -DTEST_DECLARE_QSORT_R=ON)
-if(COMPILE_SUCCESS_2 AND (RUN_RESULT_2 EQUAL 0))
-    SET(VAR_2 0)
-else()
-    SET(VAR_2 1)
-endif()
-file(APPEND "${config_FN}" "#define NEED_DECLARE_QSORT_R ${VAR_2}\n")
-
-try_run(RUN_RESULT_3 COMPILE_SUCCESS_3 ${CMAKE_CURRENT_BINARY_DIR} ${config_SRCS} COMPILE_DEFINITIONS -DTEST_QSORT_R=ON)
-if(COMPILE_SUCCESS_3 AND (RUN_RESULT_3 EQUAL 0))
-    SET(VAR_3 1)
-else()
-    SET(VAR_3 0)
-endif()
-file(APPEND "${config_FN}" "#define NEED_QSORT_R ${VAR_3}\n")
-
-try_run(RUN_RESULT_4 COMPILE_SUCCESS_4 ${CMAKE_CURRENT_BINARY_DIR} ${config_SRCS} COMPILE_DEFINITIONS -DTEST_SWAP_QSORT_R=ON)
-if(COMPILE_SUCCESS_4 AND (RUN_RESULT_4 EQUAL 0))
-    SET(VAR_4 1)
-else()
-    SET(VAR_4 0)
-endif()
-file(APPEND "${config_FN}" "#define NEED_SWAP_QSORT_R ${VAR_4}\n")
-
-endif(WIN32)
-
-# We aren't using netpbm in this program, so set this to 0 no matter what
-file(APPEND "${config_FN}" "#define HAVE_NETPBM 0")
-
 option(BUILD_TESTER "Build stellarsolver tester program, instead of just the library" Off)
 option(BUILD_BATCH_SOLVER "Build stellarsolver batch solver program, instead of just the library" Off)
 option(BUILD_DEMOS "Build stellarsolver basic demonstration programs, instead of just the library" Off)
