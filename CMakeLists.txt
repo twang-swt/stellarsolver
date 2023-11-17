@@ -95,7 +95,8 @@ option(BUILD_TESTS "Build stellarsolver tests, instead of just the library" Off)
 find_package(CFITSIO REQUIRED)
 find_package(GSL REQUIRED)
 find_package(WCSLIB REQUIRED)
-find_package(Qt5 5.4 REQUIRED COMPONENTS Gui Widgets Core Concurrent Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Widgets Core Concurrent Network)
 
 if(WIN32)
     find_package(Boost 1.45.0 COMPONENTS regex)
@@ -244,10 +245,10 @@ target_link_libraries(stellarsolver
     ${CFITSIO_LIBRARIES}
     ${GSL_LIBRARIES}
     ${WCSLIB_LIBRARIES}
-    Qt5::Core
-    Qt5::Network
-    Qt5::Widgets
-    Qt5::Concurrent
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
     )
 
 if(WIN32)
@@ -313,11 +314,11 @@ if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
         ${CFITSIO_LIBRARIES}
         ${GSL_LIBRARIES}
         ${WCSLIB_LIBRARIES}
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Core
-        Qt5::Network
-        Qt5::Concurrent
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Concurrent
         )
 endif(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
 
@@ -332,7 +333,7 @@ set(StellarSolverTester_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/tester/resources.qrc
     )
 
-qt5_wrap_ui(StellarSolverui_SRCS
+qt_wrap_ui(StellarSolverui_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/tester/mainwindow.ui
     )
 
@@ -359,11 +360,11 @@ target_link_libraries(StellarSolverTester
     ${CFITSIO_LIBRARIES}
     ${GSL_LIBRARIES}
     ${WCSLIB_LIBRARIES}
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Core
-    Qt5::Network
-    Qt5::Concurrent
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Concurrent
     )
 
 if(WIN32)
@@ -399,7 +400,7 @@ if(BUILD_BATCH_SOLVER)
          ${CMAKE_CURRENT_SOURCE_DIR}/stellarbatchsolver/resources.qrc
         )
 
-    qt5_wrap_ui(StellarBatchSolverui_SRCS
+    qt_wrap_ui(StellarBatchSolverui_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/stellarbatchsolver/stellarbatchsolver.ui
         )
 
@@ -425,10 +426,10 @@ if(BUILD_BATCH_SOLVER)
         ${CFITSIO_LIBRARIES}
         ${GSL_LIBRARIES}
         ${WCSLIB_LIBRARIES}
-        Qt5::Widgets
-        Qt5::Core
-        Qt5::Network
-        Qt5::Concurrent
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Concurrent
         )
 
     if(WIN32)
@@ -465,10 +466,10 @@ if(BUILD_DEMOS)
         ${CFITSIO_LIBRARIES}
         ${GSL_LIBRARIES}
         ${WCSLIB_LIBRARIES}
-        Qt5::Widgets
-        Qt5::Core
-        Qt5::Network
-        Qt5::Concurrent
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Concurrent
         )
 
     add_executable(DemoStarExtract ${CMAKE_CURRENT_SOURCE_DIR}/demos/demostarextract.cpp)
@@ -511,10 +512,10 @@ if(BUILD_TESTS)
         ${CFITSIO_LIBRARIES}
         ${GSL_LIBRARIES}
         ${WCSLIB_LIBRARIES}
-        Qt5::Widgets
-        Qt5::Core
-        Qt5::Network
-        Qt5::Concurrent
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Concurrent
         )
 
     add_executable(TestTwoStellarSolvers ${CMAKE_CURRENT_SOURCE_DIR}/tests/testtwostellarsolvers.cpp)
