@@ -52,13 +52,12 @@ find_package(WCSLIB REQUIRED)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Widgets Core Concurrent Network)
 
+set(CFITSIO_LIBRARIES cfitsio)
+set(GSL_LIBRARIES gsl)
+
 if(WIN32)
     find_package(Boost 1.45.0 COMPONENTS regex)
 endif(WIN32)
-
-if (NOT CFITSIO_FOUND OR CFITSIO_VERSION_MAJOR LESS 3)
-  message(FATAL_ERROR "CFITSIO version too old, Please install cfitsio 3.x and try again. http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html")
-endif (NOT CFITSIO_FOUND OR CFITSIO_VERSION_MAJOR LESS 3)
 
 if (CFITSIO_FOUND)
   include_directories(${CFITSIO_INCLUDE_DIR})
@@ -189,11 +188,7 @@ set(ALL_SRCS
     ${qfits_SRCS}
     )
 
-if (WIN32)
-    add_library(stellarsolver STATIC ${ALL_SRCS})
-else(WIN32)
-    add_library(stellarsolver SHARED ${ALL_SRCS})
-endif(WIN32)
+add_library(stellarsolver STATIC ${ALL_SRCS})
 
 target_link_libraries(stellarsolver
     ${CFITSIO_LIBRARIES}
@@ -505,22 +500,12 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
     )
 
-# 2. Configure the Exports and namespace
-export(TARGETS stellarsolver
-    NAMESPACE ${PROJECT_NAME}::
-    FILE ${TARGET_EXPORT_NAME}.cmake)
 # 3. Configure the Include Directories
 target_include_directories(stellarsolver PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/libstellarsolver>)
-
-# 4. Install StellarSolver Config
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_CONFIG}.cmake
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION ${ConfigPackageLocation})
 
 # 5. Install StellarSolver Config Version
 install(FILES
