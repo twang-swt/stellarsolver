@@ -175,6 +175,9 @@ set(StellarSolver_SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/stellarsolver.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometrylogger.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/wcsdata.cpp
+
+   ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/classdefinitions.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/stellar_solver.cpp
    )
 
 set(ALL_SRCS
@@ -250,7 +253,6 @@ install(DIRECTORY
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/stellarsolver.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stellarsolver.pc DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
 
-if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
     set(SSolverUtilsLib_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/fileio.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/imagelabel.cpp
@@ -269,7 +271,6 @@ if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Concurrent
         )
-endif(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
 
 #########################################################################################
 ## Stellar Solver Tester
