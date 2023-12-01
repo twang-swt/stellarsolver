@@ -40,12 +40,14 @@ void Stellar_Solver::init()
 {
     registerMetaTypes();
     QStringList dirs;
+    QStringList indexFolder;
 #if defined(Q_OS_ANDROID)
     dirs << "assets:/fits";
 #else
     dirs << "fits";
 #endif
     QStringList fitFiles = this->getIndexFiles(dirs);
+    indexFolder << "./fits";
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 #if defined(Q_OS_ANDROID)
     QString copyFitsDirPath = "./fits";
@@ -73,8 +75,11 @@ void Stellar_Solver::init()
         copyFitFiles << copyFitFileName;
     }
     fitFiles = copyFitFiles;
+    indexFolder.clear();
+    indexFolder << copyFitsDirPath;
 #endif
     this->clearIndexFileAndFolderPaths();
+    this->setIndexFolderPaths(indexFolder);
     this->setIndexFilePaths(fitFiles);
 }
 

@@ -6,6 +6,8 @@
     version 2 of the License, or (at your option) any later version.
 */
 #if defined(__APPLE__)
+#include <mach/mach.h>
+#include <mach/mach_host.h>
 #include <sys/sysctl.h>
 #elif defined(_WIN32)
 #include "windows.h"
@@ -407,7 +409,17 @@ void StellarSolver::parallelSolve()
     qDeleteAll(parallelSolvers);
     parallelSolvers.clear();
     m_ParallelSolversFinishedCount = 0;
-    int threads = qMin(QThread::idealThreadCount(), 2);
+    int threads = qMin(QThread::idealThreadCount(), 
+#if defined(Q_OS_IOS)
+    4
+#elif defined(Q_OS_ANDROID) || defined(Q_OS_LINUX)
+    8
+#elif defined(Q_OS_WIN32)
+    8
+#else
+    8
+#endif
+    );
 
     if(params.multiAlgorithm == MULTI_SCALES)
     {
@@ -997,6 +1009,30 @@ bool StellarSolver::getAvailableRAM(double &availableRAM, double &totalRAM)
     //Until I can figure out how to get free RAM on Mac
     availableRAM = RAMcheck;
     totalRAM = RAMcheck;
+
+    mach_port_t host_port;
+    mach_msg_type_number_t host_size;
+    vm_size_t pagesize;
+
+    host_port = mach_host_self();
+    host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
+    host_page_size(host_port, &pagesize);
+
+    vm_statistics_data_t vm_stat;
+
+    if(host_statistics(host_port, HOST_VM_INFO, (host_info_t) &vm_stat, &host_size) != KERN_SUCCESS)
+    {
+        return false;
+    }
+
+    /* Stats in bytes */
+    natural_t mem_used = (vm_stat.active_count + vm_stat.inactive_count + vm_stat.wire_count)
+                         * pagesize;
+    natural_t mem_free = vm_stat.free_count * pagesize;
+    natural_t mem_total = mem_used + mem_free;
+
+    availableRAM = static_cast<double>(mem_free);
+//    totalRAM = static_cast<double>(mem_total);
 #elif defined(Q_OS_LINUX)
     QProcess p;
     p.start("awk", QStringList() << "/MemFree/ { print $2 }" << "/proc/meminfo");
