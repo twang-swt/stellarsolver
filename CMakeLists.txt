@@ -26,10 +26,6 @@ configure_file(
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
-endif(APPLE)
-
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 include(GNUInstallDirs)
 

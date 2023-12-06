@@ -33,10 +33,10 @@
 
 #include <assert.h>
 
+#include <QSettings>
 #include <QShortcut>
 #include <QThread>
 #include <QInputDialog>
-#include <QtConcurrent>
 #include <QToolTip>
 #include <QtGlobal>
 #include "version.h"
@@ -452,7 +452,7 @@ MainWindow::MainWindow() :
     timerMonitor.setInterval(1000); //1 sec intervals
     connect(&timerMonitor, &QTimer::timeout, this, [this]()
     {
-        ui->status->setText(QString("Processing Trial %1: %2 s").arg(currentTrial).arg((int)processTimer.elapsed() / 1000) + 1);
+        ui->status->setText(QString("Processing Trial %1: %2 s").arg(currentTrial).arg((int)processTimer.elapsed() / 1000 + 1));
     });
 
     setWindowIcon(QIcon(":/StellarSolverIcon.png"));
