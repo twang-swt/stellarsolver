@@ -224,6 +224,10 @@ if (MSVC) # We need to disable some warnings caused by using code designed for U
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif (MSVC)
 
+target_include_directories(stellarsolver PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver
+)
+
 install(TARGETS stellarsolver
     EXPORT ${TARGET_EXPORT_NAME}
     DESTINATION ${CMAKE_INSTALL_LIBDIR}
