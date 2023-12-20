@@ -109,25 +109,32 @@ bool Stellar_Solver::loadNewImageBuffer(const QString file)
         Q_EMIT this->logOutput(logText);
     });
 
-    //#if defined(Q_OS_ANDROID)
-    //    QString copyFitsDirPath = "./fits";
-    //#elif defined(Q_OS_IOS)
-    //    QString documents = QString::fromUtf8(
-    //        (SW::CppNSHomeDirectory() + std::string("/Documents")).c_str());
-    //    QString copyFitsDirPath = documents + "/fits";
-    //#endif
-    //    QDir copyFitsDir(copyFitsDirPath);
-    //    QStringList copyFitFiles;
-    //    if (!copyFitsDir.exists()) {
-    //        copyFitsDir.mkpath(copyFitsDirPath);
-    //    }
-    //    QFile fitFile = QFile("./fits/test.png");
-    //    QString copyFitFileName = copyFitsDirPath + "/" + "test.png";
-    //    QFile copyFitFile(copyFitFileName);
-    //    if (!copyFitFile.exists()) {
-    //        fitFile.copy(copyFitFileName);
-    //        copyFitFile.setPermissions(QFile::ReadOwner);
-    //    }
+// #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+// #if defined(Q_OS_ANDROID)
+//        QString copyFitsDirPath = "./fits";
+// #elif defined(Q_OS_IOS)
+//        QString documents = QString::fromUtf8(
+//            (SW::CppNSHomeDirectory() + std::string("/Documents")).c_str());
+//        QString copyFitsDirPath = documents + "/fits";
+// #endif
+//        QDir copyFitsDir(copyFitsDirPath);
+//        QStringList copyFitFiles;
+//        if (!copyFitsDir.exists()) {
+//            copyFitsDir.mkpath(copyFitsDirPath);
+//        }
+       
+// #if defined(Q_OS_ANDROID)
+//         QFile fitFile = QFile("assets:/fits/test.png");
+// #elif defined(Q_OS_IOS)
+//         QFile fitFile = QFile("fits/test.png");
+// #endif
+//     QString copyFitFileName = copyFitsDirPath + "/" + "test.png";
+//     QFile copyFitFile(copyFitFileName);
+//     if (!copyFitFile.exists()) {
+//         fitFile.copy(copyFitFileName);
+//         copyFitFile.setPermissions(QFile::ReadOwner);
+//     }
+// #endif
 
     if (imageLoader.loadImage(file)) {
         ret = StellarSolver::loadNewImageBuffer(imageLoader.getStats(),
