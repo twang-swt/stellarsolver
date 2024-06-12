@@ -250,11 +250,7 @@ set(ALL_SRCS
     ${qfits_SRCS}
     )
 
-if (WIN32)
     add_library(stellarsolver STATIC ${ALL_SRCS})
-else(WIN32)
-    add_library(stellarsolver SHARED ${ALL_SRCS})
-endif(WIN32)
 
 target_link_libraries(stellarsolver
     ${CFITSIO_LIBRARIES}
