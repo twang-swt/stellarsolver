@@ -585,37 +585,3 @@ if(BUILD_TESTS)
     endif(NOT EXISTS "${CMAKE_BINARY_DIR}/astrometry/")
 
 endif(BUILD_TESTS)
-
-#########################################################################################
-# Generate Package Config Files
-#########################################################################################
-# Set destination directory
-set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-
-# 1. Generate the StellarSolverConfigVersion.cmake
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_EXPORT_CONFIG}Version.cmake"
-    VERSION ${${PROJECT_NAME}_VERSION}
-    COMPATIBILITY SameMajorVersion
-    )
-
-# 2. Configure the Exports and namespace
-export(TARGETS stellarsolver
-    NAMESPACE ${PROJECT_NAME}::
-    FILE ${TARGET_EXPORT_NAME}.cmake)
-# 3. Configure the Include Directories
-target_include_directories(stellarsolver PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/libstellarsolver>)
-
-# 4. Install StellarSolver Config
-install(EXPORT ${TARGET_EXPORT_NAME}
-        FILE ${TARGET_EXPORT_CONFIG}.cmake
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION ${ConfigPackageLocation})
-
-# 5. Install StellarSolver Config Version
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_EXPORT_CONFIG}Version.cmake"
-        DESTINATION ${ConfigPackageLocation})
