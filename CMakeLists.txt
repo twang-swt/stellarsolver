@@ -232,8 +232,6 @@ set(StellarSolver_SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/parameters.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/extractorsolver.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/internalextractorsolver.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/externalextractorsolver.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/onlinesolver.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/stellarsolver.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometrylogger.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/wcsdata.cpp

@@ -14,12 +14,10 @@
 #else //Linux
 #include <QProcess>
 #endif
-#include "externalextractorsolver.h"
+#include "internalextractorsolver.h"
 
 #include "stellarsolver.h"
 #include "extractorsolver.h"
-
-#include "onlinesolver.h"
 
 
 using namespace SSolver;
@@ -103,26 +101,12 @@ ExtractorSolver* StellarSolver::createExtractorSolver()
 
     if(m_ProcessType == SOLVE && m_SolverType == SOLVER_ONLINEASTROMETRY)
     {
-        OnlineSolver *onlineSolver = new OnlineSolver(m_ProcessType, m_ExtractorType, m_SolverType, m_Statistics, m_ImageBuffer,
-                this);
-        onlineSolver->fileToProcess = m_FileToProcess;
-        onlineSolver->astrometryAPIKey = m_AstrometryAPIKey;
-        onlineSolver->astrometryAPIURL = m_AstrometryAPIURL;
-        onlineSolver->externalPaths = m_ExternalPaths;
-        solver = onlineSolver;
     }
     else if((m_ProcessType == SOLVE && m_SolverType == SOLVER_STELLARSOLVER) || (m_ProcessType != SOLVE
             && m_ExtractorType != EXTRACTOR_EXTERNAL))
         solver = new InternalExtractorSolver(m_ProcessType, m_ExtractorType, m_SolverType, m_Statistics, m_ImageBuffer, this);
     else
     {
-        ExternalExtractorSolver *extSolver = new ExternalExtractorSolver(m_ProcessType, m_ExtractorType, m_SolverType,
-                m_Statistics, m_ImageBuffer, this);
-        extSolver->fileToProcess = m_FileToProcess;
-        extSolver->externalPaths = m_ExternalPaths;
-        extSolver->cleanupTemporaryFiles = m_CleanupTemporaryFiles;
-        extSolver->autoGenerateAstroConfig = m_AutoGenerateAstroConfig;
-        solver = extSolver;
     }
 
     if(useSubframe)
@@ -149,7 +133,7 @@ ExtractorSolver* StellarSolver::createExtractorSolver()
 
 ExternalProgramPaths StellarSolver::getDefaultExternalPaths(ComputerSystemType system)
 {
-    return ExternalExtractorSolver::getDefaultExternalPaths(system);
+    return ExternalProgramPaths();
 };
 
 ExternalProgramPaths StellarSolver::getDefaultExternalPaths()
@@ -288,34 +272,15 @@ void StellarSolver::start()
         //Note that converting the image to a FITS file if desired, doesn't need to be repeated in all the threads, but also CFITSIO fails when accessed by multiple parallel threads.
         if(m_SolverType == SOLVER_LOCALASTROMETRY && m_ExtractorType == EXTRACTOR_BUILTIN)
         {
-            ExternalExtractorSolver *extSolver = static_cast<ExternalExtractorSolver*> (m_ExtractorSolver.data());
-            QFileInfo file(extSolver->fileToProcess);
-            int ret = extSolver->saveAsFITS();
-            if(ret != 0)
-            {
-                emit logOutput("Failed to save FITS File.");
-                return;
-            }
         }
         // There is no reason to generate a bunch of copies of the config file, just one will do for all the parallel threads.
         if(m_SolverType == SOLVER_LOCALASTROMETRY)
         {
-            ExternalExtractorSolver *extSolver = static_cast<ExternalExtractorSolver*> (m_ExtractorSolver.data());
-            extSolver->generateAstrometryConfigFile();
         }
         parallelSolve();
     }
     else if(m_SolverType == SOLVER_ONLINEASTROMETRY)
     {
-        OnlineSolver *onSolver = static_cast<OnlineSolver*> (m_ExtractorSolver.data());
-        int ret = onSolver->saveAsFITS();
-        if(ret != 0)
-        {
-            emit logOutput("Failed to save FITS File.");
-            return;
-        }
-        connect(m_ExtractorSolver.data(), &ExtractorSolver::finished, this, &StellarSolver::processFinished);
-        m_ExtractorSolver->execute();
     }
     else
     {
