@@ -255,13 +255,11 @@ target_link_libraries(stellarsolver
     ${GSL_LIBRARIES}
     ${WCSLIB_LIBRARIES}
     Qt::Core
-    Qt::Network
-    Qt::Widgets
     Qt::Concurrent
     )
 
 if(WIN32)
-    target_link_libraries(stellarsolver wsock32 ${Boost_LIBRARIES})
+    target_link_libraries(stellarsolver wsock32)
 else(WIN32)
     set_target_properties(stellarsolver PROPERTIES VERSION ${StellarSolver_VERSION_STRING} SOVERSION ${StellarSolver_SOVERSION} OUTPUT_NAME stellarsolver)
 endif(WIN32)

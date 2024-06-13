@@ -5,7 +5,6 @@
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
 */
-#include <QApplication>
 #include <QSettings>
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
