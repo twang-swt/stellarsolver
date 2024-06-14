@@ -308,13 +308,32 @@ install(DIRECTORY
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/stellarsolver.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/stellarsolver.pc DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
 
+# A lib with fewer dependencies than SSolverUtilsLib
+add_library(SSolverio STATIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/fileio.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/stretch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/bayer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/dms.cpp
+)
+target_link_libraries(SSolverio
+    PUBLIC
+        Qt::Gui
+    PRIVATE
+        Qt::Core
+        Qt::Concurrent
+)
+target_include_directories(SSolverio INTERFACE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver
+    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tester
+)
+
+
 if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS OR BUILD_CLI)
     set(SSolverUtilsLib_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/fileio.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/imagelabel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/stretch.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/bayer.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/ssolverutils/dms.cpp
         )
     add_library(SSolverUtilsLib STATIC ${SSolverUtilsLib_SRCS})
     target_link_libraries(SSolverUtilsLib
@@ -326,6 +345,7 @@ if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS OR BUILD_CLI
         Qt::Core
         Qt::Network
         Qt::Concurrent
+        SSolverio
         )
 endif(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS OR BUILD_CLI)
 
