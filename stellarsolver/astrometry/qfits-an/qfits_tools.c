@@ -39,13 +39,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef _WIN32 //# Modified by Robert Lancaster for the StellarSolver Internal Library
-#include <boost/regex.h>
-#else
-#include <regex.h>
-#include <unistd.h>
-#endif
-
 #include "qfits_config.h"
 #include "qfits_tools.h"
 #include "qfits_card.h"
@@ -61,22 +54,6 @@
 size_t qfits_blocks_needed(size_t size) {
 	return (size + FITS_BLOCK_SIZE - 1) / FITS_BLOCK_SIZE;
 }
-
-/*
- * The following global variables are only used for regular expression
- * matching of integers and floats. These definitions are private to
- * this module.
- */
-/** A regular expression matching a floating-point number */
-static const char* regex_float =
-    "^[+-]?([0-9]+[.]?[0-9]*|[.][0-9]+)([eEdD][+-]?[0-9]+)?$";
-
-/** A regular expression matching an integer */
-static const char* regex_int = "^[+-]?[0-9]+$";
-
-/** A regular expression matching a complex number (int or float) */
-static const char* regex_cmp =
-"^[+-]?([0-9]+[.]?[0-9]*|[.][0-9]+)([eEdD][+-]?[0-9]+)?[ ]+[+-]?([0-9]+[.]?[0-9]*|[.][0-9]+)([eEdD][+-]?[0-9]+)?$";
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -150,81 +127,6 @@ int qfits_is_boolean(const char * s)
     if ((int)strlen(s)>1) return 0;
     if (s[0]=='T' || s[0]=='F') return 1;
     return 0;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-  @brief    Identify if a FITS value is an int.
-  @param    s FITS value as a string
-  @return   int 0 or 1
-
-  Identifies if a FITS value is an integer.
- */
-/*----------------------------------------------------------------------------*/
-int qfits_is_int(const char * s)
-{
-    regex_t re_int;
-    int     status;
-
-    if (s==NULL) return 0;
-    if (s[0]==0) return 0;
-    if (regcomp(&re_int, regex_int, REG_EXTENDED|REG_NOSUB)!=0) {
-        qfits_error("internal error: compiling int rule");
-        exit(-1);
-    }
-    status = regexec(&re_int, s, 0, NULL, 0);
-    regfree(&re_int); 
-    return (status) ? 0 : 1;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-  @brief    Identify if a FITS value is float.
-  @param    s FITS value as a string
-  @return   int 0 or 1
-
-  Identifies if a FITS value is float.
- */
-/*----------------------------------------------------------------------------*/
-int qfits_is_float(const char * s)
-{
-    regex_t re_float;
-    int     status;
-
-    if (s==NULL) return 0;
-    if (s[0]==0) return 0;
-    if (regcomp(&re_float, regex_float, REG_EXTENDED|REG_NOSUB)!=0) {
-        qfits_error("internal error: compiling float rule");
-        exit(-1);
-    }
-    status = regexec(&re_float, s, 0, NULL, 0);
-    regfree(&re_float); 
-    return (status) ? 0 : 1;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
-  @brief    Identify if a FITS value is complex.
-  @param    s FITS value as a string
-  @return   int 0 or 1
-
-  Identifies if a FITS value is complex.
- */
-/*----------------------------------------------------------------------------*/
-int qfits_is_complex(const char * s)
-{
-    regex_t re_cmp;
-    int     status;
-
-    if (s==NULL) return 0;
-    if (s[0]==0) return 0;
-    if (regcomp(&re_cmp, regex_cmp, REG_EXTENDED|REG_NOSUB)!=0) {
-        qfits_error("internal error: compiling complex rule");
-        exit(-1);
-    }
-    status = regexec(&re_cmp, s, 0, NULL, 0);
-    regfree(&re_cmp); 
-    return (status) ? 0 : 1;
 }
 
 /*----------------------------------------------------------------------------*/

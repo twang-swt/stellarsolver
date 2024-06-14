@@ -144,6 +144,7 @@ set(qfits_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_table.c
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_time.c
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_tools.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_tools.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_byteswap.c
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_memory.c
     ${CMAKE_CURRENT_SOURCE_DIR}/stellarsolver/astrometry/qfits-an/qfits_rw.c
