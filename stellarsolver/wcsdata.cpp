@@ -2,8 +2,19 @@
 #include "wcsdata.h"
 
 //WCSLib Includes
+#if defined(_MSC_VER)
+    // wcsset() from wcs.h is unused here, but its name collides with MSVC's
+    // deprecated <string.h> function wcsset(), 
+    // which gets included by Qt header needed by this file.
+    // And the deprecated <string.h> function is being enabled by the 
+    // *_NONSTDC_* preprocessor for other reasons.
+    #define wcsset wcsset_renamed
+#endif
 #include <wcshdr.h>
 #include <wcsfix.h>
+#if defined(_MSC_VER)
+    #undef wcsset
+#endif
 
 //Astrometry.net includes
 extern "C" {
