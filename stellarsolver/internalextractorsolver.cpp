@@ -263,6 +263,17 @@ void computeMargin(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2,
 int InternalExtractorSolver::runSEPExtractor()
 {
     QMutexLocker locker(&futuresMutex);
+    if(!futures.empty())
+    {
+        for (auto &oneFuture : futures)
+        {
+            if(oneFuture.isRunning())
+                oneFuture.waitForFinished();
+        }
+
+        futures.clear();
+    }
+
     if(convFilter.size() == 0)
     {
         emit logOutput("No convFilter included.");
@@ -342,84 +353,6 @@ int InternalExtractorSolver::runSEPExtractor()
     // We have 2 or more threads.
     // The image width and height is larger than partition size.
     constexpr int PARTITION_SIZE = 200;
-    if (m_ActiveParameters.partition &&  w > PARTITION_SIZE && h > PARTITION_SIZE && (m_PartitionThreads % 2) == 0)
-    {
-        // Partition the image to regions.
-        // If there is extra at the end, we add an offset.
-        // e.g. 500x400 image with patitions sized 200x200 would have 4 paritions
-        // #1 0, 0, 200, 200 (200 x 200)
-        // #2 200, 0, 200 + 100, 200 (300 x 200)
-        // #3 0, 200, 200, 200 (200 x 200)
-        // #4 200, 200, 200 + 100, 200 (300 x 200)
-
-        int W_PARTITION_SIZE = PARTITION_SIZE;
-        int H_PARTITION_SIZE = PARTITION_SIZE;
-
-        // Limit it to PARTITION_THREADS
-        if ( (w * h) / (W_PARTITION_SIZE * H_PARTITION_SIZE) > m_PartitionThreads)
-        {
-            W_PARTITION_SIZE = w / (m_PartitionThreads / 2);
-            H_PARTITION_SIZE = h / 2;
-        }
-
-        int horizontalPartitions = w / W_PARTITION_SIZE;
-        int verticalPartitions = h / H_PARTITION_SIZE;
-        int horizontalOffset = w - (W_PARTITION_SIZE * horizontalPartitions);
-        int verticalOffset = h - (H_PARTITION_SIZE * verticalPartitions);
-
-        for (int i = 0; i < verticalPartitions; i++)
-        {
-            for (int j = 0; j < horizontalPartitions; j++)
-            {
-                int offsetW = (j == horizontalPartitions - 1) ? horizontalOffset : 0;
-                int offsetH = (i == verticalPartitions - 1) ? verticalOffset : 0;
-
-                const uint32_t rawStartX = x + j * W_PARTITION_SIZE;
-                const uint32_t rawStartY = y + i * H_PARTITION_SIZE;
-                const uint32_t rawEndX = rawStartX + W_PARTITION_SIZE + offsetW;
-                const uint32_t rawEndY = rawStartY + H_PARTITION_SIZE + offsetH;
-
-                uint32_t startX, startY, subWidth, subHeight;
-                computeMargin(rawStartX, rawStartY, rawEndX - 1, rawEndY - 1,
-                              m_Statistics.width, m_Statistics.height, DEFAULT_MARGIN,
-                              &startX, &startY, &subWidth, &subHeight);
-
-                startupOffsets.append(StartupOffset(startX, startY, subWidth, subHeight,
-                                                    rawStartX, rawStartY, rawEndX - 1, rawEndY - 1));
-
-                float* data = allocateDataBuffer(startX, startY, subWidth, subHeight);
-                if(data == nullptr)
-                {
-                    for (auto *buffer : dataBuffers)
-                        delete [] buffer;
-                    dataBuffers.clear();
-                    emit logOutput("Failed to allocate memory.");
-                    return -1;
-                }
-                if(data)
-                    dataBuffers.append(data);
-                FITSImage::Background tempBackground;
-                backgrounds.append(tempBackground);
-
-                ImageParams parameters = {data,
-                                          subWidth,
-                                          subHeight,
-                                          0,
-                                          0,
-                                          subWidth,
-                                          subHeight,
-                                          m_ActiveParameters.initialKeep / m_PartitionThreads,
-                                          &backgrounds[backgrounds.size() - 1]
-                                         };
-                #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-                    futures.append(QtConcurrent::run(&InternalExtractorSolver::extractPartition, this, parameters));
-                #else
-                    futures.append(QtConcurrent::run(this, &InternalExtractorSolver::extractPartition, parameters));
-                #endif
-            }
-        }
-    }
-    else
     {
         // In this case, there is no partitioning, but it is still possible that margins apply.
         // E.g. a subframe rectangle with enough space around it to have margins.
