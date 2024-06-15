@@ -691,13 +691,13 @@ bool fileio::parseHeader()
             // Is it Integer?
             oneRecord.value.toInt(&ok);
             if (ok)
-                oneRecord.value.convert(QMetaType::Int);
+                oneRecord.value.convert(QMetaType(QMetaType::Int));
             else
             {
                 // Is it double?
                 oneRecord.value.toDouble(&ok);
                 if (ok)
-                    oneRecord.value.convert(QMetaType::Double);
+                    oneRecord.value.convert(QMetaType(QMetaType::Double));
             }
         }
 
