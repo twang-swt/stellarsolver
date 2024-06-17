@@ -331,7 +331,12 @@ void * qfits_memory_malloc(
         /* Create swap file with rights: rw-rw-rw- */
         swapfileid = ++ qfits_memory_table.file_reg;
         fname = qfits_memory_tmpfilename(swapfileid);
-        swapfd = open(fname, O_RDWR | O_CREAT);
+#ifndef _WIN32
+        mode_t mod = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
+#else
+        int mod = _S_IREAD | _S_IWRITE;
+#endif
+        swapfd = open(fname, O_RDWR | O_CREAT, mod);
         if (swapfd==-1) {
             debug("qfits_mem: cannot create swap file\n"); //# Modified by Robert Lancaster for the StellarSolver Internal Library for logging
             exit(-1);
