@@ -597,7 +597,7 @@ class StellarSolver : public QObject
          * @brief finishParallelSolve slot gets called when a Parallel Plate Solve finishes.
          * @param code Whether the process has failed or not.  0 means success.
          */
-        void finishParallelSolve(int success);
+        void finishParallelSolve(ExtractorSolver *reportingSolver, int success);
 
     private:
 

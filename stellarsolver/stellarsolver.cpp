@@ -44,8 +44,6 @@ StellarSolver::StellarSolver(ProcessType type, const FITSImage::Statistic &image
 StellarSolver::~StellarSolver()
 {
     // These lines make sure that before the StellarSolver is deleted, all parallel threads (if any) are shut down
-    for(auto &solver : parallelSolvers)
-      disconnect(solver, &ExtractorSolver::finished, this, &StellarSolver::finishParallelSolve);
 
     abortAndWait();
 }
@@ -414,7 +412,19 @@ void StellarSolver::parallelSolve()
             double low = minScale + scaleConst * pow(thread, 2);
             double high = minScale + scaleConst * pow(thread + 1, 2);
             ExtractorSolver *solver = m_ExtractorSolver->spawnChildSolver(thread);
-            connect(solver, &ExtractorSolver::finished, this, &StellarSolver::finishParallelSolve);
+            connect(
+                solver,
+                &ExtractorSolver::finished,
+                this,
+                [this, solver](int exit_code) {
+                    finishParallelSolve(solver, exit_code);
+                },
+                Qt::ConnectionType(
+                    (QCoreApplication::instance() ? Qt::AutoConnection
+                                                  : Qt::DirectConnection) |
+                    Qt::SingleShotConnection
+                )
+            );
             solver->setSearchScale(low, high, units);
             parallelSolvers.append(solver);
             if(m_SSLogLevel != LOG_OFF)
@@ -440,7 +450,19 @@ void StellarSolver::parallelSolve()
         for(int i = 1; i < sourceNum; i += inc)
         {
             ExtractorSolver *solver = m_ExtractorSolver->spawnChildSolver(i);
-            connect(solver, &ExtractorSolver::finished, this, &StellarSolver::finishParallelSolve);
+            connect(
+                solver,
+                &ExtractorSolver::finished,
+                this,
+                [this, solver](int exit_code) {
+                    finishParallelSolve(solver, exit_code);
+                },
+                Qt::ConnectionType(
+                    (QCoreApplication::instance() ? Qt::AutoConnection
+                                                  : Qt::DirectConnection) |
+                    Qt::SingleShotConnection
+                )
+            );
             solver->depthlo = i;
             solver->depthhi = i + inc;
             parallelSolvers.append(solver);
@@ -510,13 +532,12 @@ int StellarSolver::whichSolver(ExtractorSolver *solver)
 }
 
 //This slot listens for signals from the child solvers that they are in fact done with the solve
-void StellarSolver::finishParallelSolve(int success)
+void StellarSolver::finishParallelSolve(ExtractorSolver *reportingSolver, int success)
 {
     bool emitReady = false;
     bool emitFinished = false;
 
     m_ParallelSolversFinishedCount++;
-    ExtractorSolver *reportingSolver = qobject_cast<ExtractorSolver*>(sender());
     if(!reportingSolver)
         return;
 
