@@ -986,7 +986,7 @@ void fileio::logIssue(QString message){
     if(logToSignal)
         emit logOutput(message);
     else
-        printf("%s", message.toUtf8().data());
+        fprintf(stderr, "%s", message.toUtf8().data());
 }
 
 uint8_t *fileio::getImageBuffer()
