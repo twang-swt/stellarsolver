@@ -79,6 +79,9 @@ public:
 
     QImage getRawQImage()
     {
+        if (rawImage.isNull()) {
+            generateQImage();
+        }
         return rawImage;
     }
 

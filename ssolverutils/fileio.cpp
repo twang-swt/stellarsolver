@@ -35,8 +35,9 @@ bool fileio::loadImage(QString fileName)
         success = loadFits(fileName);
     else
         success = loadOtherFormat(fileName);
-    if(success)
-        generateQImage();
+    if(success) {
+        rawImage = QImage();
+    }
     return success;
 }
 
