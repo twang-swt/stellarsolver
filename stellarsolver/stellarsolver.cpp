@@ -985,7 +985,7 @@ bool StellarSolver::appendStarsRAandDEC(QList<FITSImage::Star> &stars)
 //But from what I read, getting the Available RAM is inconsistent and buggy on many systems.
 bool StellarSolver::getAvailableRAM(double &availableRAM, double &totalRAM)
 {
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
     int mib [] = { CTL_HW, HW_MEMSIZE };
     size_t length;
     length = sizeof(int64_t);
