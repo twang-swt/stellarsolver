@@ -107,10 +107,15 @@ find_package(WCSLIB REQUIRED)
 # Option to choose between Qt5 and Qt6
 option(USE_QT5 "Use Qt5" OFF)
 
+set(COMPONENTS_FROM_QT Gui Core Concurrent Network)
+if(BUILD_TESTER OR BUILD_BATCH_SOLVER OR BUILD_DEMOS OR BUILD_TESTS)
+    list(APPEND COMPONENTS_FROM_QT Widgets)
+endif()
+
 if(USE_QT5)
-    find_package(Qt5 5.15 REQUIRED COMPONENTS Gui Widgets Core Concurrent Network)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS ${COMPONENTS_FROM_QT})
 else()
-    find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Core Concurrent Network)
+    find_package(Qt6 REQUIRED COMPONENTS ${COMPONENTS_FROM_QT})
 endif()
 
 if(WIN32)
